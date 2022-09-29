@@ -1,50 +1,29 @@
 #!/usr/bin/python3
-"""
-Fabric script generates .tgz archive from contents of web_static directory
-"""
-from fabric.api import local, env, run, put
-from datetime import datetime
-import os
+"""web server distribution"""
+from fabric.api import *
+import os.path
 
-
-env.hosts = ['54.152.200.18', '54.224.57.104']
-
-
-def do_pack():
-    """ return archive path if successful """
-    cur_time = datetime.now().strftime("%Y%m%d%H%M%S")
-
-    local("mkdir -p versions")
-    try:
-        local("tar -cvzf versions/web_static_{}.tgz web_static".format(
-            cur_time))
-        return ("versions/web_static_{}.tgz".format(cur_time))
-    except:
-        return None
+env.user = 'ubuntu'
+env.hosts = ["104.196.155.240", "34.74.146.120"]
+env.key_filename = "~/id_rsa"
 
 
 def do_deploy(archive_path):
-    """ return `True` if successful """
-
-    if os.path.exists(archive_path):
-        return None
-    else:
+    """distributes an archive to your web servers
+    """
+    if os.path.exists(archive_path) is False:
         return False
-
-    pathname = "/data/web_static"
-    filename = os.path.basename(archive_path)
-    name = os.path.splitext(filename)
-
     try:
-        put(archive_path, "/tmp")
-        run("mkdir -p /data/web_static/releases/{}".format(name))
-        run("tar -xzf /tmp/{} -C /data/web_static/releases/{}".format(
-            filename, name))
-        run("rm /tmp/{}".format(filename))
-        run("mv /data/web/static/releases/{}".format(name))
-        run("rm -rf /data/web_static/relases/{}/web_static".format(name))
-        run("rm -rf /data/web_static/current")
-        run("ln -s {}/releases/{} {}/current".format(pathname, name))
+        arc = archive_path.split("/")
+        base = arc[1].strip('.tgz')
+        put(archive_path, '/tmp/')
+        sudo('mkdir -p /data/web_static/releases/{}'.format(base))
+        main = "/data/web_static/releases/{}".format(base)
+        sudo('tar -xzf /tmp/{} -C {}/'.format(arc[1], main))
+        sudo('rm /tmp/{}'.format(arc[1]))
+        sudo('mv {}/web_static/* {}/'.format(main, main))
+        sudo('rm -rf /data/web_static/current')
+        sudo('ln -s {}/ "/data/web_static/current"'.format(main))
         return True
     except:
         return False

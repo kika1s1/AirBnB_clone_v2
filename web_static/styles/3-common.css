@@ -1,5 +1,9 @@
-body{
-    color: #484848;
-    font-size: 14px;
-    font-family: Cicular, "Helvetica Neue",Arial, Helvetica, sans-serif;
+body {
+        box-sizing: border-box;
+        height: 0%;
+        margin: 0%;
+        padding:0%;
+        color:  #484848;
+        font-size: 14px;
+        font-family: Circular,"Helvetica Neue", Helvetica, Arial, sans-serif;
 }

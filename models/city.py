@@ -1,23 +1,27 @@
 #!/usr/bin/python3
-'''
-    Define the class City.
-'''
+"""
+    contains City class to represent a city
+    contains City class to represent a city
+"""
+
 from models.base_model import BaseModel, Base
-import models
-from os import environ
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
+from models.state import State
 from sqlalchemy.orm import relationship
+from sqlalchemy import Column, String, ForeignKey
+from os import environ
+
+storage_engine = environ.get("HBNB_TYPE_STORAGE")
 
 
 class City(BaseModel, Base):
-    '''
-        Define the class City that inherits from BaseModel.
-    '''
-    __tablename__ = "cities"
-    if environ.get("HBNB_TYPE_STORAGE") == "db":
+    """ City class :City class to represent a city
+    City class :City class to represent a city"""
+
+    if (storage_engine == "db"):
+        __tablename__ = "cities"
+        state_id = Column(String(60), ForeignKey(State.id))
         name = Column(String(128), nullable=False)
-        state_id = Column(String(60), ForeignKey("states.id"), nullable=False)
-        places = relationship("Place", backref="cities", cascade="delete")
+        places = relationship("Place", backref="cities")
     else:
         name = ""
         state_id = ""

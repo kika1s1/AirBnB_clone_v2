@@ -1,144 +1,60 @@
 #!/usr/bin/python3
-''' Test suite for the console'''
-
-
-import sys
-import models
+"""test for console to make it start working"""
 import unittest
 from io import StringIO
 from console import HBNBCommand
-from unittest.mock import create_autospec
+import sys
+from models.base_model import BaseModel
+from models.user import User
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.place import Place
+from models.review import Review
+from models.engine.file_storage import FileStorage
+from models.engine.db_storage import DBStorage
 
 
-class test_console(unittest.TestCase):
-    ''' Test the console module'''
-    def setUp(self):
-        '''setup for'''
-        self.backup = sys.stdout
-        self.capt_out = StringIO()
-        sys.stdout = self.capt_out
+class TestConsole(unittest.TestCase):
+    """this will test the console"""
 
-    def tearDown(self):
-        ''''''
-        sys.stdout = self.backup
+    def test_exists(self):
+        """checking for docstrings i think"""
+        self.assertIsNotNone(HBNBCommand.do_quit.__doc__)
+        self.assertIsNotNone(HBNBCommand.do_create.__doc__)
+        self.assertIsNotNone(HBNBCommand.do_show.__doc__)
+        self.assertIsNotNone(HBNBCommand.do_destroy.__doc__)
+        self.assertIsNotNone(HBNBCommand.do_all.__doc__)
+        self.assertIsNotNone(HBNBCommand.do_update.__doc__)
 
-    def create(self):
-        ''' create an instance of the HBNBCommand class'''
-        return HBNBCommand()
+    @classmethod
+    def get_S(cls):
+        """get stringio value and close"""
+        temp_out = StringIO()
+        sys.stdout = temp_out
+        return temp_out.getvalue()
 
-    def test_quit(self):
-        ''' Test quit exists'''
-        console = self.create()
-        self.assertTrue(console.onecmd("quit"))
+    def test_create_error(self):
+        """test if create works right"""
+        temp_out = StringIO()
+        sys.stdout = temp_out
 
-    def test_EOF(self):
-        ''' Test EOF exists'''
-        console = self.create()
-        self.assertTrue(console.onecmd("EOF"))
+        HBNBCommand().do_create(None)
+        self.assertEqual(temp_out.getvalue(), '** class name missing **\n')
+        temp_out.close()
 
-    def test_all(self):
-        ''' Test all exists'''
-        console = self.create()
-        console.onecmd("all")
-        self.assertTrue(isinstance(self.capt_out.getvalue(), str))
+        temp_out = StringIO()
+        sys.stdout = temp_out
+        HBNBCommand().do_create("base")
+        self.assertEqual(temp_out.getvalue(), '** class doesn\'t exist **\n')
+        temp_out.close()
 
-    def test_show(self):
-        '''
-            Testing that show exists
-        '''
-        console = self.create()
-        console.onecmd("create User")
-        user_id = self.capt_out.getvalue()
-        sys.stdout = self.backup
-        self.capt_out.close()
-        self.capt_out = StringIO()
-        sys.stdout = self.capt_out
-        console.onecmd("show User " + user_id)
-        x = (self.capt_out.getvalue())
-        sys.stdout = self.backup
-        self.assertTrue(str is type(x))
+        temp_out = StringIO()
+        sys.stdout = temp_out
+        HBNBCommand().do_create("BaseModel")
+        self.assertEqual(temp_out.getvalue(), '** class doesn\'t exist **\n')
+        temp_out.close()
+        sys.stdout = sys.__stdout__
 
-    def test_show_class_name(self):
-        '''
-            Testing the error messages for class name missing.
-        '''
-        console = self.create()
-        console.onecmd("create User")
-        user_id = self.capt_out.getvalue()
-        sys.stdout = self.backup
-        self.capt_out.close()
-        self.capt_out = StringIO()
-        sys.stdout = self.capt_out
-        console.onecmd("show")
-        x = (self.capt_out.getvalue())
-        sys.stdout = self.backup
-        self.assertEqual("** class name missing **\n", x)
-
-    def test_show_class_name(self):
-        '''
-            Test show message error for id missing
-        '''
-        console = self.create()
-        console.onecmd("create User")
-        user_id = self.capt_out.getvalue()
-        sys.stdout = self.backup
-        self.capt_out.close()
-        self.capt_out = StringIO()
-        sys.stdout = self.capt_out
-        console.onecmd("show User")
-        x = (self.capt_out.getvalue())
-        sys.stdout = self.backup
-        self.assertEqual("** instance id missing **\n", x)
-
-    def test_show_no_instance_found(self):
-        '''
-            Test show message error for id missing
-        '''
-        console = self.create()
-        console.onecmd("create User")
-        user_id = self.capt_out.getvalue()
-        sys.stdout = self.backup
-        self.capt_out.close()
-        self.capt_out = StringIO()
-        sys.stdout = self.capt_out
-        console.onecmd("show User " + "124356876")
-        x = (self.capt_out.getvalue())
-        sys.stdout = self.backup
-        self.assertEqual("** no instance found **\n", x)
-
-    def test_create(self):
-        '''
-            Test that create works
-        '''
-        console = self.create()
-        console.onecmd("create User")
-        self.assertTrue(isinstance(self.capt_out.getvalue(), str))
-
-    def test_class_name(self):
-        '''
-            Testing the error messages for class name missing.
-        '''
-        console = self.create()
-        console.onecmd("create")
-        x = (self.capt_out.getvalue())
-        self.assertEqual("** class name missing **\n", x)
-
-    def test_class_name_doest_exist(self):
-        '''
-            Testing the error messages for class name missing.
-        '''
-        console = self.create()
-        console.onecmd("create Binita")
-        x = (self.capt_out.getvalue())
-        self.assertEqual("** class doesn't exist **\n", x)
-
-    '''
-    def test_destroy(self):
-        console = self.create()
-        self.assertTrue(console.onecmd("destroy"))
-
-    def test_update(self):
-        console = self.create()
-        self.assertTrue(console.onecmd("update"))
-
-    '''
+if __name__ == "__main__":
+    unittest.main()
